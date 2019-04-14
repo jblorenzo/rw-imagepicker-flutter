@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   Copyright (c) 2019 Razeware LLC
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -30,17 +29,17 @@
   -->
 
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@android:color/white" />
+  <item android:drawable="@android:color/white" />
 
-    <item>
-        <bitmap
-            android:gravity="center"
-            android:src="@mipmap/rwdevcon_bg" />
-    </item>
+  <item>
+    <bitmap
+      android:gravity="center"
+      android:src="@mipmap/rwdevcon_bg" />
+  </item>
 
-    <item>
-        <bitmap
-          android:gravity="center"
-          android:src="@mipmap/razewarelogo_128" />
-    </item>
+  <item>
+    <bitmap
+      android:gravity="center"
+      android:src="@mipmap/razewarelogo_128" />
+  </item>
 </layer-list>

@@ -28,21 +28,13 @@
  * THE SOFTWARE.
  */
 
-import 'package:flutter/material.dart';
-import 'package:imagepickerflutter/MultiGallerySelectPage.dart';
+import 'dart:typed_data';
 
-void main() => runApp(MyApp());
+class GalleryImage {
+  Uint8List bytes;
+  String id;
+  int dateCreated;
+  String location;
 
-class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(
-          primaryColor: Color(0xff006837),
-          primaryColorDark: Color(0xff004012),
-          accentColor: Color(0xffc75f00)),
-      home: MultiGallerySelectPage(),
-    );
-  }
+  GalleryImage({this.bytes, this.id, this.dateCreated, this.location});
 }

@@ -29,20 +29,62 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:imagepickerflutter/MultiGallerySelectPage.dart';
+import 'package:imagepickerflutter/GalleryImage.dart';
 
-void main() => runApp(MyApp());
+class MultiGallerySelectPage extends StatefulWidget {
+  createState() => _MultiGallerySelectPageState();
+}
 
-class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+class _MultiGallerySelectPageState extends State<MultiGallerySelectPage> {
+  final _numberOfColumns = 4;
+  final _title = "Gallery";
+
+  var _selectedItems = List<GalleryImage>();
+  var _itemCache = Map<int, GalleryImage>();
+
+  Future<GalleryImage> _getItem(int index) async {
+    // TODO: fetch gallery content here
+  }
+
+  _selectItem(int index) {
+    // TODO: process item selection/deselection here
+  }
+
+  // TODO: replace with actual image count
+  _numberOfItems() => 5;
+
+  // TODO: Render image in card
+  _buildItem(int index) => GestureDetector(
+      onTap: () {
+        _selectItem(index);
+      },
+      child: Card(
+        elevation: 2.0,
+        child: FutureBuilder(
+            future: _getItem(index),
+            builder: (context, snapshot) {
+              var item = snapshot?.data;
+              if (item != null) {
+                return Container();
+              }
+
+              return Container();
+            }),
+      ));
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(
-          primaryColor: Color(0xff006837),
-          primaryColorDark: Color(0xff004012),
-          accentColor: Color(0xffc75f00)),
-      home: MultiGallerySelectPage(),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(_title),
+      ),
+      body: GridView.builder(
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: _numberOfColumns),
+          itemCount: _numberOfItems(),
+          itemBuilder: (context, index) {
+            return _buildItem(index);
+          }),
     );
   }
 }
