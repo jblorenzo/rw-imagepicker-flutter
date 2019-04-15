@@ -30,14 +30,81 @@
 
 package com.raywenderlich.imagepickerflutter
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
-
+import android.provider.MediaStore
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import io.flutter.app.FlutterActivity
 import io.flutter.plugins.GeneratedPluginRegistrant
 
-class MainActivity: FlutterActivity() {
+class MainActivity : FlutterActivity() {
+  private val permissionCode = 21441
+
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+
+    val permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+
+    if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+      ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), permissionCode)
+    } else {
+      checkGallery()
+    }
+
+
     GeneratedPluginRegistrant.registerWith(this)
+  }
+
+  private fun checkGallery() {
+    println("number of items ${getGalleryImageCount()}")
+    dataForGalleryItem(0) { data, created, location ->
+      println("first item $data $created $location")
+    }
+  }
+
+  override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    if (requestCode == permissionCode
+        && grantResults.isNotEmpty()
+        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+      checkGallery()
+    }
+  }
+
+
+  private fun dataForGalleryItem(index: Int, completion: (ByteArray, Int, String) -> Unit) {
+    var uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+
+    var cursor = contentResolver.query(uri, columns, null, null, null)
+    cursor?.apply {
+      moveToPosition(index)
+
+      var dataIndex = getColumnIndexOrThrow(MediaStore.MediaColumns.DATA)
+      var createdIndex = getColumnIndexOrThrow(MediaStore.Images.Media.DATE_ADDED)
+      var latitudeIndex = getColumnIndexOrThrow(MediaStore.Images.Media.LATITUDE)
+      var longitudeIndex = getColumnIndexOrThrow(MediaStore.Images.Media.LONGITUDE)
+
+      var data = getBlob(dataIndex)
+      var created = getInt(createdIndex)
+      var latitude = getDouble(latitudeIndex)
+      var longitude = getDouble(longitudeIndex)
+
+      completion(data, created, "$latitude, $longitude")
+    }
+  }
+
+  private val columns = arrayOf(
+      MediaStore.MediaColumns.DATA,
+      MediaStore.Images.Media.DATE_ADDED,
+      MediaStore.Images.Media.LATITUDE,
+      MediaStore.Images.Media.LONGITUDE)
+
+  private fun getGalleryImageCount(): Int {
+    var uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+
+    var cursor = contentResolver.query(uri, columns, null, null, null);
+
+    return cursor?.count ?: 0
   }
 }
