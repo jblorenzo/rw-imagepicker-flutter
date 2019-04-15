@@ -39,6 +39,11 @@ import androidx.core.content.ContextCompat
 import io.flutter.app.FlutterActivity
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugins.GeneratedPluginRegistrant
+import android.graphics.BitmapFactory
+import android.graphics.Bitmap
+import java.io.ByteArrayInputStream
+import java.io.File
+
 
 class MainActivity : FlutterActivity() {
   private val permissionCode = 21441
@@ -103,7 +108,9 @@ class MainActivity : FlutterActivity() {
       var latitudeIndex = getColumnIndexOrThrow(MediaStore.Images.Media.LATITUDE)
       var longitudeIndex = getColumnIndexOrThrow(MediaStore.Images.Media.LONGITUDE)
 
-      var data = getBlob(dataIndex)
+      var filePath = getString(dataIndex)
+      val data = File(filePath).readBytes()
+
       var created = getInt(createdIndex)
       var latitude = getDouble(latitudeIndex)
       var longitude = getDouble(longitudeIndex)

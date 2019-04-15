@@ -64,7 +64,12 @@ class _MultiGallerySelectPageState extends State<MultiGallerySelectPage> {
         }));
   }
 
-  // TODO: Render image in card
+  Future<Map<String, dynamic>> _getItem(int index) async {
+    var item = await _channel.invokeMethod("getItem", index);
+    var map = Map<String, dynamic>.from(item);
+    return map;
+  }
+
   _buildItem(int index) => GestureDetector(
       onTap: () {
         _selectItem(index);
@@ -76,7 +81,8 @@ class _MultiGallerySelectPageState extends State<MultiGallerySelectPage> {
             builder: (context, snapshot) {
               var item = snapshot?.data;
               if (item != null) {
-                return Container();
+                var data = map['data'];
+                return Image.memory(data, fit: BoxFit.cover);
               }
 
               return Container();
