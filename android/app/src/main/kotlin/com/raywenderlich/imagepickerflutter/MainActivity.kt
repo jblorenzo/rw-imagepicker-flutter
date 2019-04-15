@@ -37,6 +37,7 @@ import android.provider.MediaStore
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import io.flutter.app.FlutterActivity
+import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugins.GeneratedPluginRegistrant
 
 class MainActivity : FlutterActivity() {
@@ -55,6 +56,13 @@ class MainActivity : FlutterActivity() {
 
 
     GeneratedPluginRegistrant.registerWith(this)
+
+    val channel = MethodChannel(flutterView, "/gallery")
+    channel.setMethodCallHandler { call, result ->
+      when (call.method) {
+        "getItemCount" -> result.success(getGalleryImageCount())
+      }
+    }
   }
 
   private fun checkGallery() {

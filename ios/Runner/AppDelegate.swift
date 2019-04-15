@@ -10,10 +10,15 @@ import Photos
     ) -> Bool {
     GeneratedPluginRegistrant.register(with: self)
 
-    print("image count: \(getGalleryImageCount())")
-    dataForGalleryItem(index: 0) { (data, created, location) in
-      if let data = data {
-        print("first data: \(data) \(created) \(location)")
+    guard let controller = window?.rootViewController as? FlutterViewController else {
+      fatalError("rootViewController is not type FlutterViewController")
+    }
+
+    let channel = FlutterMethodChannel(name: "/gallery", binaryMessenger: controller)
+    channel.setMethodCallHandler { (call, result) in
+      switch (call.method) {
+      case "getItemCount": result(self.getGalleryImageCount())
+      default: result(FlutterError(code: "0", message: nil, details: nil))
       }
     }
     

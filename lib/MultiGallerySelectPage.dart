@@ -30,6 +30,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:imagepickerflutter/GalleryImage.dart';
+import 'package:flutter/services.dart';
 
 class MultiGallerySelectPage extends StatefulWidget {
   createState() => _MultiGallerySelectPageState();
@@ -38,6 +39,8 @@ class MultiGallerySelectPage extends StatefulWidget {
 class _MultiGallerySelectPageState extends State<MultiGallerySelectPage> {
   final _numberOfColumns = 4;
   final _title = "Gallery";
+
+  final _channel = MethodChannel("/gallery");
 
   var _selectedItems = List<GalleryImage>();
   var _itemCache = Map<int, GalleryImage>();
@@ -50,8 +53,16 @@ class _MultiGallerySelectPageState extends State<MultiGallerySelectPage> {
     // TODO: process item selection/deselection here
   }
 
-  // TODO: replace with actual image count
-  _numberOfItems() => 5;
+  var _numberOfItems = 0;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _channel.invokeMethod<int>("getItemCount").then((count) => setState(() {
+          _numberOfItems = count;
+        }));
+  }
 
   // TODO: Render image in card
   _buildItem(int index) => GestureDetector(
@@ -75,16 +86,15 @@ class _MultiGallerySelectPageState extends State<MultiGallerySelectPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_title),
-      ),
-      body: GridView.builder(
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: _numberOfColumns),
-          itemCount: _numberOfItems(),
-          itemBuilder: (context, index) {
-            return _buildItem(index);
-          }),
-    );
+        appBar: AppBar(
+          title: Text(_title),
+        ),
+        body: GridView.builder(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: _numberOfColumns),
+            itemCount: _numberOfItems,
+            itemBuilder: (context, index) {
+              return _buildItem(index);
+            }));
   }
 }
