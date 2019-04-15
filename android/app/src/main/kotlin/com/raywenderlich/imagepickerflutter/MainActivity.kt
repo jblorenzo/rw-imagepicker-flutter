@@ -32,6 +32,8 @@ package com.raywenderlich.imagepickerflutter
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.provider.MediaStore
 import androidx.core.app.ActivityCompat
@@ -39,10 +41,9 @@ import androidx.core.content.ContextCompat
 import io.flutter.app.FlutterActivity
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugins.GeneratedPluginRegistrant
-import android.graphics.BitmapFactory
-import android.graphics.Bitmap
-import java.io.ByteArrayInputStream
 import java.io.File
+import android.media.ExifInterface
+import java.io.ByteArrayOutputStream
 
 
 class MainActivity : FlutterActivity() {
@@ -59,7 +60,6 @@ class MainActivity : FlutterActivity() {
       checkGallery()
     }
 
-
     GeneratedPluginRegistrant.registerWith(this)
 
     val channel = MethodChannel(flutterView, "/gallery")
@@ -68,9 +68,10 @@ class MainActivity : FlutterActivity() {
         "getItemCount" -> result.success(getGalleryImageCount())
         "getItem" -> {
           val index = (call.arguments as? Int) ?: 0
-          dataForGalleryItem(index) { data, created, location ->
+          dataForGalleryItem(index) { data, id, created, location ->
             result.success(mapOf<String, Any>(
                 "data" to data,
+                "id" to id,
                 "created" to created,
                 "location" to location
             ))
@@ -82,8 +83,8 @@ class MainActivity : FlutterActivity() {
 
   private fun checkGallery() {
     println("number of items ${getGalleryImageCount()}")
-    dataForGalleryItem(0) { data, created, location ->
-      println("first item $data $created $location")
+    dataForGalleryItem(0) { data, id, created, location ->
+      println("first item $data $id $created $location")
     }
   }
 
@@ -96,31 +97,42 @@ class MainActivity : FlutterActivity() {
   }
 
 
-  private fun dataForGalleryItem(index: Int, completion: (ByteArray, Int, String) -> Unit) {
+  private fun dataForGalleryItem(index: Int, completion: (ByteArray, String, Int, String) -> Unit) {
     var uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+    val orderBy = MediaStore.Images.Media.DATE_TAKEN
 
-    var cursor = contentResolver.query(uri, columns, null, null, null)
+    var cursor = contentResolver.query(uri, columns, null, null, "$orderBy DESC")
     cursor?.apply {
       moveToPosition(index)
 
-      var dataIndex = getColumnIndexOrThrow(MediaStore.MediaColumns.DATA)
+      var idIndex = getColumnIndexOrThrow(MediaStore.Images.Media._ID)
+      var dataIndex = getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
       var createdIndex = getColumnIndexOrThrow(MediaStore.Images.Media.DATE_ADDED)
       var latitudeIndex = getColumnIndexOrThrow(MediaStore.Images.Media.LATITUDE)
       var longitudeIndex = getColumnIndexOrThrow(MediaStore.Images.Media.LONGITUDE)
 
+      var id = getString(idIndex)
       var filePath = getString(dataIndex)
-      val data = File(filePath).readBytes()
+
+//      val exif = ExifInterface(filePath)
+//      val data = exif.thumbnail
+      var file = File(filePath)
+      var bmp = MediaStore.Images.Thumbnails.getThumbnail(contentResolver, id.toLong(), MediaStore.Images.Thumbnails.MINI_KIND, null)
+      val stream = ByteArrayOutputStream()
+      bmp.compress(Bitmap.CompressFormat.JPEG, 90, stream)
+      val data = stream.toByteArray()
 
       var created = getInt(createdIndex)
       var latitude = getDouble(latitudeIndex)
       var longitude = getDouble(longitudeIndex)
 
-      completion(data, created, "$latitude, $longitude")
+      completion(data, id, created, "$latitude, $longitude")
     }
   }
 
   private val columns = arrayOf(
-      MediaStore.MediaColumns.DATA,
+      MediaStore.Images.Media.DATA,
+      MediaStore.Images.Media._ID,
       MediaStore.Images.Media.DATE_ADDED,
       MediaStore.Images.Media.LATITUDE,
       MediaStore.Images.Media.LONGITUDE)

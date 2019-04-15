@@ -45,12 +45,20 @@ class _MultiGallerySelectPageState extends State<MultiGallerySelectPage> {
   var _selectedItems = List<GalleryImage>();
   var _itemCache = Map<int, GalleryImage>();
 
-  Future<GalleryImage> _getItem(int index) async {
-    // TODO: fetch gallery content here
+  _selectItem(int index) async {
+    var galleryImage = await _getItem(index);
+
+    setState(() {
+      if (_isSelected(galleryImage.id)) {
+        _selectedItems.removeWhere((anItem) => anItem.id == galleryImage.id);
+      } else {
+        _selectedItems.add(galleryImage);
+      }
+    });
   }
 
-  _selectItem(int index) {
-    // TODO: process item selection/deselection here
+  _isSelected(String id) {
+    return _selectedItems.where((item) => item.id == id).length > 0;
   }
 
   var _numberOfItems = 0;
@@ -64,10 +72,23 @@ class _MultiGallerySelectPageState extends State<MultiGallerySelectPage> {
         }));
   }
 
-  Future<Map<String, dynamic>> _getItem(int index) async {
-    var item = await _channel.invokeMethod("getItem", index);
-    var map = Map<String, dynamic>.from(item);
-    return map;
+  Future<GalleryImage> _getItem(int index) async {
+    if (_itemCache[index] != null) {
+      return _itemCache[index];
+    } else {
+      var channelResponse = await _channel.invokeMethod("getItem", index);
+      var item = Map<String, dynamic>.from(channelResponse);
+
+      var galleryImage = GalleryImage(
+          bytes: item['data'],
+          id: item['id'],
+          dateCreated: item['created'],
+          location: item['location']);
+
+      _itemCache[index] = galleryImage;
+
+      return galleryImage;
+    }
   }
 
   _buildItem(int index) => GestureDetector(
@@ -81,8 +102,16 @@ class _MultiGallerySelectPageState extends State<MultiGallerySelectPage> {
             builder: (context, snapshot) {
               var item = snapshot?.data;
               if (item != null) {
-                var data = map['data'];
-                return Image.memory(data, fit: BoxFit.cover);
+                return Container(
+                  child: Image.memory(item.bytes, fit: BoxFit.cover),
+                  decoration: BoxDecoration(
+                      border: Border.all(
+                          color: Theme.of(context).primaryColor,
+                          width: 2,
+                          style: _isSelected(item.id)
+                              ? BorderStyle.solid
+                              : BorderStyle.none)),
+                );
               }
 
               return Container();
