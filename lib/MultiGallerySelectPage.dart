@@ -46,7 +46,22 @@ class _MultiGallerySelectPageState extends State<MultiGallerySelectPage> {
   var _itemCache = Map<int, GalleryImage>();
 
   Future<GalleryImage> _getItem(int index) async {
-    // TODO: fetch gallery content here
+    if (_itemCache[index] != null) {
+      return _itemCache[index];
+    } else {
+      var channelResponse = await _channel.invokeMethod("getItem", index);
+      var item = Map<String, dynamic>.from(channelResponse);
+
+      var galleryImage = GalleryImage(
+          bytes: item['data'],
+          id: item['id'],
+          dateCreated: item['created'],
+          location: item['location']);
+
+      _itemCache[index] = galleryImage;
+
+      return galleryImage;
+    }
   }
 
   _selectItem(int index) async {
