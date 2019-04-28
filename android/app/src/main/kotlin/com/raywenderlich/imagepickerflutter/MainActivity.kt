@@ -32,12 +32,15 @@ package com.raywenderlich.imagepickerflutter
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.provider.MediaStore
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import io.flutter.app.FlutterActivity
 import io.flutter.plugins.GeneratedPluginRegistrant
+import java.io.ByteArrayOutputStream
+import java.io.File
 
 class MainActivity : FlutterActivity() {
   private val permissionCode = 21441
@@ -72,7 +75,32 @@ class MainActivity : FlutterActivity() {
   }
 
   private fun dataForGalleryItem(index: Int, completion: (ByteArray, String, Int, String) -> Unit) {
+    var uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+    val orderBy = MediaStore.Images.Media.DATE_TAKEN
 
+    var cursor = contentResolver.query(uri, columns, null, null, "$orderBy DESC")
+
+    cursor?.apply {
+      moveToPosition(index)
+
+      var idIndex = getColumnIndexOrThrow(MediaStore.Images.Media._ID)
+      var createdIndex = getColumnIndexOrThrow(MediaStore.Images.Media.DATE_ADDED)
+      var latitudeIndex = getColumnIndexOrThrow(MediaStore.Images.Media.LATITUDE)
+      var longitudeIndex = getColumnIndexOrThrow(MediaStore.Images.Media.LONGITUDE)
+
+      var id = getString(idIndex)
+
+      var bmp = MediaStore.Images.Thumbnails.getThumbnail(contentResolver, id.toLong(), MediaStore.Images.Thumbnails.MINI_KIND, null)
+      val stream = ByteArrayOutputStream()
+      bmp.compress(Bitmap.CompressFormat.JPEG, 90, stream)
+      val data = stream.toByteArray()
+
+      var created = getInt(createdIndex)
+      var latitude = getDouble(latitudeIndex)
+      var longitude = getDouble(longitudeIndex)
+
+      completion(data, id, created, "$latitude, $longitude")
+    }
   }
 
   private val columns = arrayOf(
@@ -83,6 +111,10 @@ class MainActivity : FlutterActivity() {
       MediaStore.Images.Media.LONGITUDE)
 
   private fun getGalleryImageCount(): Int {
-    return 0
+    var uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+
+    var cursor = contentResolver.query(uri, columns, null, null, null);
+
+    return cursor?.count ?: 0
   }
 }
