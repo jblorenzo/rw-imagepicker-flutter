@@ -35,10 +35,12 @@ import Flutter
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?
   ) -> Bool {
-    print("image count: \(getGalleryImageCount())")
-    dataForGalleryItem(index: 0) { (data, id, created, location) in
-      if let data = data {
-        print("first data: \(data) \(id) \(created) \(location)")
+    DispatchQueue.main.async {
+      NSLog("\nimage count: \(self.getGalleryImageCount())")
+      self.dataForGalleryItem(index: 0) { (data, id, created, location) in
+        if let data = data {
+          NSLog("\nfirst data: \(data) \(id) \(created) \(location)")
+        }
       }
     }
 
