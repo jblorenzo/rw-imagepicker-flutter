@@ -30,14 +30,58 @@
 
 package com.raywenderlich.imagepickerflutter
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
-
+import android.provider.MediaStore
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import io.flutter.app.FlutterActivity
 import io.flutter.plugins.GeneratedPluginRegistrant
 
-class MainActivity: FlutterActivity() {
+class MainActivity : FlutterActivity() {
+  private val permissionCode = 21441
+
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+
+    val permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+
+    if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+      ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), permissionCode)
+    } else {
+      checkGallery()
+    }
+
     GeneratedPluginRegistrant.registerWith(this)
+  }
+
+  private fun checkGallery() {
+    println("number of items ${getGalleryImageCount()}")
+    dataForGalleryItem(0) { data, id, created, location ->
+      println("first item $data $id $created $location")
+    }
+  }
+
+  override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    if (requestCode == permissionCode
+        && grantResults.isNotEmpty()
+        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+      checkGallery()
+    }
+  }
+
+  private fun dataForGalleryItem(index: Int, completion: (ByteArray, String, Int, String) -> Unit) {
+
+  }
+
+  private val columns = arrayOf(
+      MediaStore.MediaColumns.DATA,
+      MediaStore.Images.Media.DATE_ADDED,
+      MediaStore.Images.Media.LATITUDE,
+      MediaStore.Images.Media.LONGITUDE)
+
+  private fun getGalleryImageCount(): Int {
+    return 0
   }
 }
