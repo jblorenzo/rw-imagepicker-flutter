@@ -51,7 +51,13 @@ class _MultiGallerySelectPageState extends State<MultiGallerySelectPage> {
   }
 
   // TODO: replace with actual image count
-  _numberOfItems() => 5;
+  var _numberOfItems = 5;
+
+  void initState() {
+    super.initState();
+
+    // TODO: implement this
+  }
 
   // TODO: Render image in card
   _buildItem(int index) => GestureDetector(
@@ -81,7 +87,7 @@ class _MultiGallerySelectPageState extends State<MultiGallerySelectPage> {
       body: GridView.builder(
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: _numberOfColumns),
-          itemCount: _numberOfItems(),
+          itemCount: _numberOfItems,
           itemBuilder: (context, index) {
             return _buildItem(index);
           }),
