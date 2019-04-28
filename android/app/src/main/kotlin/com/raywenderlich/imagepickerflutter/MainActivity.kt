@@ -76,7 +76,8 @@ class MainActivity : FlutterActivity() {
   }
 
   private val columns = arrayOf(
-      MediaStore.MediaColumns.DATA,
+      MediaStore.Images.Media.DATA,
+      MediaStore.Images.Media._ID,
       MediaStore.Images.Media.DATE_ADDED,
       MediaStore.Images.Media.LATITUDE,
       MediaStore.Images.Media.LONGITUDE)
