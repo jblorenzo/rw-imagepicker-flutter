@@ -46,8 +46,20 @@ class _MultiGallerySelectPageState extends State<MultiGallerySelectPage> {
     // TODO: fetch gallery content here
   }
 
-  _selectItem(int index) {
-    // TODO: process item selection/deselection here
+  _selectItem(int index) async {
+    var galleryImage = await _getItem(index);
+
+    setState(() {
+      if (_isSelected(galleryImage.id)) {
+        _selectedItems.removeWhere((anItem) => anItem.id == galleryImage.id);
+      } else {
+        _selectedItems.add(galleryImage);
+      }
+    });
+  }
+
+  _isSelected(String id) {
+    return _selectedItems.where((item) => item.id == id).length > 0;
   }
 
   // TODO: replace with actual image count
@@ -71,7 +83,16 @@ class _MultiGallerySelectPageState extends State<MultiGallerySelectPage> {
             builder: (context, snapshot) {
               var item = snapshot?.data;
               if (item != null) {
-                return Container();
+                return Container(
+                  child: Image.memory(item.bytes, fit: BoxFit.cover),
+                  decoration: BoxDecoration(
+                      border: Border.all(
+                          color: Theme.of(context).primaryColor,
+                          width: 2,
+                          style: _isSelected(item.id)
+                              ? BorderStyle.solid
+                              : BorderStyle.none)),
+                );
               }
 
               return Container();
