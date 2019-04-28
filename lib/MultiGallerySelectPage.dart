@@ -29,6 +29,7 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:imagepickerflutter/GalleryImage.dart';
 
 class MultiGallerySelectPage extends StatefulWidget {
@@ -38,6 +39,8 @@ class MultiGallerySelectPage extends StatefulWidget {
 class _MultiGallerySelectPageState extends State<MultiGallerySelectPage> {
   final _numberOfColumns = 4;
   final _title = "Gallery";
+
+  final _channel = MethodChannel("/gallery");
 
   var _selectedItems = List<GalleryImage>();
   var _itemCache = Map<int, GalleryImage>();
@@ -62,13 +65,14 @@ class _MultiGallerySelectPageState extends State<MultiGallerySelectPage> {
     return _selectedItems.where((item) => item.id == id).length > 0;
   }
 
-  // TODO: replace with actual image count
   var _numberOfItems = 5;
 
   void initState() {
     super.initState();
 
-    // TODO: implement this
+    _channel.invokeMethod<int>("getItemCount").then((count) => setState(() {
+          _numberOfItems = count;
+        }));
   }
 
   // TODO: Render image in card

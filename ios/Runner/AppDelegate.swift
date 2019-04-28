@@ -46,6 +46,19 @@ import Photos
     }
 
     GeneratedPluginRegistrant.register(with: self)
+
+    guard let controller = window?.rootViewController as? FlutterViewController else {
+      fatalError("rootViewController is not type FlutterViewController")
+    }
+
+    let channel = FlutterMethodChannel(name: "/gallery", binaryMessenger: controller)
+    channel.setMethodCallHandler { (call, result) in
+      switch (call.method) {
+      case "getItemCount": result(self.getGalleryImageCount())
+      default: result(FlutterError(code: "0", message: nil, details: nil))
+      }
+    }
+
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
