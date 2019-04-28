@@ -55,6 +55,16 @@ import Photos
     channel.setMethodCallHandler { (call, result) in
       switch (call.method) {
       case "getItemCount": result(self.getGalleryImageCount())
+      case "getItem":
+        let index = call.arguments as? Int ?? 0
+        self.dataForGalleryItem(index: index, completion: { (data, id, created, location) in
+          result([
+               "data": data ?? Data(),
+               "id": id,
+               "created": created,
+               "location": location
+          ])
+        })
       default: result(FlutterError(code: "0", message: nil, details: nil))
       }
     }

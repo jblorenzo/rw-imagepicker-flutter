@@ -62,6 +62,17 @@ class MainActivity : FlutterActivity() {
     channel.setMethodCallHandler { call, result ->
       when (call.method) {
         "getItemCount" -> result.success(getGalleryImageCount())
+        "getItem" -> {
+          val index = (call.arguments as? Int) ?: 0
+          dataForGalleryItem(index) { data, id, created, location ->
+            result.success(mapOf<String, Any>(
+                "data" to data,
+                "id" to id,
+                "created" to created,
+                "location" to location
+            ))
+          }
+        }
         else -> println("unhandled")
       }
     }
